@@ -1,0 +1,25 @@
+{
+  "name": "@ocsec/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ocsec": "dist/cli.js"
+  },
+  "scripts": {
+    "ocsec": "node dist/cli.js",
+    "build": "tsup src/cli.ts --format esm --dts --outDir dist --clean --splitting false --sourcemap",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@ocsec/agent": "0.1.0",
+    "@ocsec/server": "0.1.0",
+    "commander": "^12.1.0",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsup": "^8.0.2",
+    "typescript": "^5.6.3"
+  }
+}

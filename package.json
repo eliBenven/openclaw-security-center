@@ -1,10 +1,20 @@
 {
   "name": "openclaw-security-center",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "echo 'TODO: dev'",
-    "build": "echo 'TODO: build'",
-    "test": "echo 'TODO: test'"
-  }
+    "dev": "npm -w @ocsec/server run dev",
+    "dashboard": "npm -w @ocsec/cli run ocsec -- dashboard",
+    "collect": "npm -w @ocsec/cli run ocsec -- collect",
+    "plan": "npm -w @ocsec/cli run ocsec -- plan",
+    "apply": "npm -w @ocsec/cli run ocsec -- apply",
+    "diff": "npm -w @ocsec/cli run ocsec -- diff",
+    "build": "npm -ws run build",
+    "test": "npm -ws run test"
+  },
+  "version": "0.1.0",
+  "description": "Security control plane for OpenClaw deployments (posture, remediation, monitoring, audit trail).",
+  "license": "MIT"
 }
