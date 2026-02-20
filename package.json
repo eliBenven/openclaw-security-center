@@ -1,0 +1,10 @@
+{
+  "name": "openclaw-security-center",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "echo 'TODO: dev'",
+    "build": "echo 'TODO: build'",
+    "test": "echo 'TODO: test'"
+  }
+}
