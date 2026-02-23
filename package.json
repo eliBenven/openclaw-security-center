@@ -11,6 +11,7 @@
     "plan": "npm -w @ocsec/cli run ocsec -- plan",
     "apply": "npm -w @ocsec/cli run ocsec -- apply",
     "diff": "npm -w @ocsec/cli run ocsec -- diff",
+    "monitor": "npm -w @ocsec/cli run ocsec -- monitor",
     "build": "npm -ws run build",
     "test": "npm -ws run test"
   },

@@ -9,7 +9,7 @@ export type RunRow = {
   snapshotJson: string;
 };
 
-export function openDb(dbPath?: string) {
+export function openDb(dbPath?: string): Database.Database {
   const p = dbPath ?? path.join(os.homedir(), '.openclaw-security-center', 'ocsec.sqlite');
   const dir = path.dirname(p);
   fs.mkdirSync(dir, { recursive: true });

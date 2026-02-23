@@ -30,16 +30,18 @@ app.post('/api/collect', async (_req, res) => {
 
 app.get('/', async (_req, res) => {
   // If no runs, auto-collect once
-  const runs = listRuns(db, 1);
+  let runs = listRuns(db, 10);
   let id = runs[0]?.id;
   if (!id) {
     const snap = await collectAll();
     id = crypto.randomUUID();
     insertRun(db, { id, collectedAt: snap.collectedAt, snapshot: snap });
+    runs = listRuns(db, 10);
   }
   const row = getRun(db, id!);
   const snap = JSON.parse(row!.snapshotJson);
-  res.type('html').send(renderDashboard(id!, snap));
+  const recentRuns = runs.map(r => ({ id: r.id, collectedAt: r.collectedAt }));
+  res.type('html').send(renderDashboard(id!, snap, recentRuns));
 });
 
 const port = Number(process.env.PORT ?? 7337);

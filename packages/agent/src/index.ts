@@ -13,9 +13,15 @@ export type CollectorResult<T> = {
 
 export type OpenClawAudit = unknown;
 
+export type ListeningPort = {
+  port: number;
+  pid: number | null;
+  process: string;
+};
+
 export type HostSignals = {
   os: { platform: string; release: string; arch: string };
-  listening?: { tcp?: string[]; raw?: string };
+  listening?: { tcp?: ListeningPort[]; raw?: string };
   firewall?: { state?: 'on' | 'off' | 'unknown'; raw?: string };
   diskEncryption?: { state?: 'on' | 'off' | 'unknown'; raw?: string };
   autoUpdates?: { state?: 'on' | 'off' | 'unknown'; raw?: string };
@@ -62,6 +68,56 @@ export async function collectOpenClaw(): Promise<NormalizedSnapshot['openclaw']>
   };
 }
 
+/** Parse macOS `lsof -nP -iTCP -sTCP:LISTEN` output into structured port entries. */
+function parseLsofPorts(raw: string): ListeningPort[] {
+  const seen = new Set<number>();
+  const results: ListeningPort[] = [];
+  const lines = raw.split('\n');
+  for (const line of lines) {
+    // Skip header row
+    if (line.startsWith('COMMAND')) continue;
+    // lsof columns: COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
+    const parts = line.trim().split(/\s+/);
+    if (parts.length < 9) continue;
+    const processName = parts[0];
+    const pid = parseInt(parts[1], 10) || null;
+    const name = parts[parts.length - 1]; // e.g. *:8080 or 127.0.0.1:443
+    const portMatch = name.match(/:(\d+)$/);
+    if (!portMatch) continue;
+    const port = parseInt(portMatch[1], 10);
+    if (seen.has(port)) continue;
+    seen.add(port);
+    results.push({ port, pid, process: processName });
+  }
+  return results;
+}
+
+/** Parse Linux `ss -ltnp` output into structured port entries. */
+function parseSsPorts(raw: string): ListeningPort[] {
+  const seen = new Set<number>();
+  const results: ListeningPort[] = [];
+  const lines = raw.split('\n');
+  for (const line of lines) {
+    if (line.startsWith('State') || line.startsWith('Netid')) continue;
+    // ss columns: State Recv-Q Send-Q Local-Address:Port Peer-Address:Port Process
+    const parts = line.trim().split(/\s+/);
+    if (parts.length < 5) continue;
+    const localAddr = parts[3]; // e.g. 0.0.0.0:22 or *:8080
+    const portMatch = localAddr.match(/:(\d+)$/);
+    if (!portMatch) continue;
+    const port = parseInt(portMatch[1], 10);
+    if (seen.has(port)) continue;
+    seen.add(port);
+    // Extract process name from users:(("sshd",pid=1234,...))
+    const rest = parts.slice(5).join(' ');
+    const procMatch = rest.match(/\("([^"]+)",pid=(\d+)/);
+    const processName = procMatch ? procMatch[1] : 'unknown';
+    const pid = procMatch ? parseInt(procMatch[2], 10) : null;
+    results.push({ port, pid, process: processName });
+  }
+  return results;
+}
+
 export async function collectHostSignals(): Promise<HostSignals> {
   const platform = os.platform();
   const host: HostSignals = {
@@ -71,7 +127,9 @@ export async function collectHostSignals(): Promise<HostSignals> {
   // Listening ports
   if (platform === 'darwin') {
     const lsof = await run('lsof', ['-nP', '-iTCP', '-sTCP:LISTEN']);
-    host.listening = { raw: lsof.ok ? lsof.value : lsof.error ? `ERROR: ${lsof.error}` : undefined };
+    const raw = lsof.ok ? lsof.value : lsof.error ? `ERROR: ${lsof.error}` : undefined;
+    const tcp = lsof.ok && lsof.value ? parseLsofPorts(lsof.value) : [];
+    host.listening = { tcp, raw };
 
     // Firewall
     const fw = await run('/usr/libexec/ApplicationFirewall/socketfilterfw', ['--getglobalstate']);
@@ -109,7 +167,9 @@ export async function collectHostSignals(): Promise<HostSignals> {
   } else {
     // Linux-ish
     const ss = await run('ss', ['-ltnp']);
-    host.listening = { raw: ss.ok ? ss.value : ss.error };
+    const rawSs = ss.ok ? ss.value : ss.error;
+    const tcpSs = ss.ok && ss.value ? parseSsPorts(ss.value) : [];
+    host.listening = { tcp: tcpSs, raw: rawSs };
 
     const ufw = await run('ufw', ['status']);
     host.firewall = {
