@@ -69,7 +69,7 @@ export async function collectOpenClaw(): Promise<NormalizedSnapshot['openclaw']>
 }
 
 /** Parse macOS `lsof -nP -iTCP -sTCP:LISTEN` output into structured port entries. */
-function parseLsofPorts(raw: string): ListeningPort[] {
+export function parseLsofPorts(raw: string): ListeningPort[] {
   const seen = new Set<number>();
   const results: ListeningPort[] = [];
   const lines = raw.split('\n');
@@ -93,7 +93,7 @@ function parseLsofPorts(raw: string): ListeningPort[] {
 }
 
 /** Parse Linux `ss -ltnp` output into structured port entries. */
-function parseSsPorts(raw: string): ListeningPort[] {
+export function parseSsPorts(raw: string): ListeningPort[] {
   const seen = new Set<number>();
   const results: ListeningPort[] = [];
   const lines = raw.split('\n');

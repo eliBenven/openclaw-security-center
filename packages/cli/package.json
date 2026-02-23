@@ -9,7 +9,7 @@
   "scripts": {
     "ocsec": "node dist/cli.js",
     "build": "tsup src/cli.ts --format esm --dts --outDir dist --clean --splitting false --sourcemap",
-    "test": "node --test"
+    "test": "echo 'no tests yet'"
   },
   "dependencies": {
     "@ocsec/agent": "0.1.0",

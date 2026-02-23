@@ -1,6 +1,6 @@
 import type { NormalizedSnapshot, ListeningPort } from '@ocsec/agent';
 
-function badge(state: string | undefined) {
+export function badge(state: string | undefined) {
   const s = state ?? 'unknown';
   const color = s === 'on' ? '#16a34a' : s === 'off' ? '#dc2626' : s === 'ok' ? '#16a34a' : s === 'error' ? '#dc2626' : '#d97706';
   return `<span class="badge" style="background:${color}">${escapeHtml(s)}</span>`;
@@ -11,7 +11,7 @@ function escapeHtml(s: string) {
 }
 
 /** Compute risk score 0-100 (100 = perfect, lower = worse) */
-function computeRiskScore(snap: NormalizedSnapshot): { score: number; deductions: Array<{ reason: string; points: number }> } {
+export function computeRiskScore(snap: NormalizedSnapshot): { score: number; deductions: Array<{ reason: string; points: number }> } {
   let score = 100;
   const deductions: Array<{ reason: string; points: number }> = [];
 

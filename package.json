@@ -17,5 +17,8 @@
   },
   "version": "0.1.0",
   "description": "Security control plane for OpenClaw deployments (posture, remediation, monitoring, audit trail).",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^3.0.5"
+  }
 }

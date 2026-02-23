@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
-    "test": "node --test"
+    "test": "vitest run"
   },
   "dependencies": {
     "zod": "^3.24.2"
