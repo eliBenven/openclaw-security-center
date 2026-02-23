@@ -9,7 +9,6 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci
-      - run: npx tsc -p packages/agent/tsconfig.json --noEmit
-      - run: npx tsc -p packages/server/tsconfig.json --noEmit
-      - run: npx tsc -p packages/cli/tsconfig.json --noEmit
+      - name: Build all packages (agent → server → cli)
+        run: npm run build
       - run: npm test
